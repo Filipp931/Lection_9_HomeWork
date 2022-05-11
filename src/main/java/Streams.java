@@ -18,7 +18,7 @@ public class Streams<E, T extends Collection<E>> {
     public Streams<E, T> filter(Predicate<? super E> predicate) {
         T col = null;
         try {
-            col = (T) collection.getClass().getConstructor().newInstance();
+            col = (T) this.collection.getClass().getConstructor().newInstance();
         } catch (Exception e) {
             e.printStackTrace();
         }

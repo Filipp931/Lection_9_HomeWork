@@ -1,11 +1,8 @@
-import java.lang.reflect.InvocationTargetException;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
+
 
 public class Streams<E, T extends Collection<E>> {
     private final T collection;
@@ -14,36 +11,47 @@ public class Streams<E, T extends Collection<E>> {
         this.collection = collection;
     }
 
-    public static<E, T extends Collection<E>> Streams of(T collection) {
+    public static<E, T extends Collection<E>> Streams<E, T> of(T collection) {
         return new Streams<>(collection);
     }
 
-    public Streams<E, T> filter(Predicate<E> predicate) {
-        T col = this.getCollection();
-        col.removeIf(predicate);
-        return new Streams<>(col);
-    }
-
-    public <R> Streams transform(Function<E, R> function) {
-        Collection<R> col = null;
+    public Streams<E, T> filter(Predicate<? super E> predicate) {
+        T col = null;
         try {
-            col = collection.getClass().getConstructor().newInstance();
+            col = (T) collection.getClass().getConstructor().newInstance();
         } catch (Exception e) {
             e.printStackTrace();
         }
+        T finalCol = col;
         collection.forEach(element -> {
-            R temp = function.apply(element);
-            col.add(temp);
+            if(predicate.test(element)) {
+                finalCol.add(element);
+            }
                 });
-        return new Streams(col);
+        return new Streams<>(col);
     }
 
-    public Map toMap(........) {
-
-
+    public <R, C extends Collection<R>> Streams<R,C> transform(Function<E, R> function) {
+        C col = null;
+        Iterator<E> iterator = this.collection.iterator();
+        try {
+            col = (C) collection.getClass().getConstructor().newInstance();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        while (iterator.hasNext()){
+            col.add(function.apply(iterator.next()));
+        }
+        return new Streams<>(col);
     }
 
-    private T getCollection() {
+    public <R, V> Map<R,V> toMap(Function<E, R> key, Function<E, V> value) {
+        Map<R, V> map = new HashMap<>();
+        this.collection.forEach(element -> map.put(key.apply(element), value.apply(element)));
+        return map;
+    }
+
+    public T getCollection() {
         return collection;
     }
 }

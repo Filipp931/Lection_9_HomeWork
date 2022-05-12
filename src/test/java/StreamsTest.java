@@ -60,4 +60,12 @@ class StreamsTest {
         result.entrySet().forEach(System.out::println);
         assertEquals(temp, result);
     }
+
+    @Test
+    void name() {
+        Streams.of(list).filter(element -> element.startsWith("f"))
+                .transform(element -> element.length())
+                .getCollection()
+                .forEach(System.out::println);
+    }
 }
